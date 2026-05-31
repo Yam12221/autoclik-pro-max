@@ -93,7 +93,8 @@ class AutoClickService : AccessibilityService() {
         params.x = 100
         params.y = 200
 
-        val inflater = LayoutInflater.from(this)
+        val themedContext = ContextThemeWrapper(this, R.style.Theme_AutoclikProMax)
+        val inflater = LayoutInflater.from(themedContext)
         controlPanelView = inflater.inflate(R.layout.layout_control_panel, null)
 
         setupControlPanelListeners(controlPanelView!!)
@@ -245,7 +246,8 @@ class AutoClickService : AccessibilityService() {
         params.x = 250
         params.y = 400
 
-        val inflater = LayoutInflater.from(this)
+        val themedContext = ContextThemeWrapper(this, R.style.Theme_AutoclikProMax)
+        val inflater = LayoutInflater.from(themedContext)
         val targetView = inflater.inflate(R.layout.layout_click_target, null)
         val txtNumber = targetView.findViewById<TextView>(R.id.txt_target_number)
         txtNumber.text = id.toString()
