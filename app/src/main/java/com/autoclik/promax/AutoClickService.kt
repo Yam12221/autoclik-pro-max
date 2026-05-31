@@ -1,0 +1,458 @@
+package com.autoclik.promax
+
+import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.GestureDescription
+import android.content.Intent
+import android.graphics.Path
+import android.graphics.PixelFormat
+import android.os.Build
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.view.ContextThemeWrapper
+import kotlinx.coroutines.*
+
+class AutoClickService : AccessibilityService() {
+
+    private lateinit var windowManager: WindowManager
+    
+    private var controlPanelView: View? = null
+    private val targets = mutableListOf<ClickTarget>()
+    private var targetIdCounter = 1
+
+    private var isPlaying = false
+    private var isLocked = false
+    private var isMinimized = false
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    companion object {
+        var instance: AutoClickService? = null
+            private set
+    }
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        instance = this
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        instance = null
+        stopClicking()
+        hideOverlay()
+        return super.onUnbind(intent)
+    }
+
+    override fun onDestroy() {
+        instance = null
+        serviceScope.cancel()
+        stopClicking()
+        hideOverlay()
+        super.onDestroy()
+    }
+
+    override fun onAccessibilityEvent(event: android.view.accessibility.AccessibilityEvent?) {
+        // No-op
+    }
+
+    override fun onInterrupt() {
+        // No-op
+    }
+
+    fun isOverlayShowing(): Boolean {
+        return controlPanelView != null
+    }
+
+    fun showOverlay() {
+        if (controlPanelView != null) return
+
+        val layoutParamsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutParamsType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        )
+
+        params.gravity = Gravity.TOP or Gravity.START
+        params.x = 100
+        params.y = 200
+
+        val inflater = LayoutInflater.from(this)
+        controlPanelView = inflater.inflate(R.layout.layout_control_panel, null)
+
+        setupControlPanelListeners(controlPanelView!!)
+
+        windowManager.addView(controlPanelView, params)
+    }
+
+    fun hideOverlay() {
+        // Clear click target overlays
+        val targetsCopy = ArrayList(targets)
+        for (target in targetsCopy) {
+            removeTarget(target)
+        }
+        targets.clear()
+        targetIdCounter = 1
+
+        // Clear control panel overlay
+        controlPanelView?.let {
+            windowManager.removeView(it)
+            controlPanelView = null
+        }
+        
+        isPlaying = false
+        isLocked = false
+        isMinimized = false
+    }
+
+    private fun setupControlPanelListeners(view: View) {
+        val imgDrag = view.findViewById<ImageView>(R.id.img_drag)
+        val btnPlay = view.findViewById<ImageView>(R.id.btn_play)
+        val btnAdd = view.findViewById<ImageView>(R.id.btn_add)
+        val btnLock = view.findViewById<ImageView>(R.id.btn_lock)
+        val btnMinimize = view.findViewById<ImageView>(R.id.btn_minimize)
+        val btnClose = view.findViewById<ImageView>(R.id.btn_close)
+
+        // Control Panel Drag Listener
+        var initialX = 0
+        var initialY = 0
+        var initialTouchX = 0f
+        var initialTouchY = 0f
+
+        imgDrag.setOnTouchListener { _, event ->
+            if (isLocked) return@setOnTouchListener false // Block panel dragging if locked
+
+            val params = view.layoutParams as WindowManager.LayoutParams
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = (initialX + (event.rawX - initialTouchX)).toInt()
+                    params.y = (initialY + (event.rawY - initialTouchY)).toInt()
+                    windowManager.updateViewLayout(view, params)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        btnPlay.setOnClickListener {
+            if (isPlaying) {
+                stopClicking()
+            } else {
+                startClicking()
+            }
+        }
+
+        btnAdd.setOnClickListener {
+            addNewTarget()
+        }
+
+        btnLock.setOnClickListener {
+            isLocked = !isLocked
+            if (isLocked) {
+                btnLock.setImageResource(R.drawable.ic_lock_closed)
+                btnLock.setColorFilter(getColor(R.color.accent))
+                // Disable controls
+                btnAdd.isEnabled = false
+                btnAdd.alpha = 0.4f
+                btnClose.isEnabled = false
+                btnClose.alpha = 0.4f
+                // Apply touchable flags to targets
+                updateTargetFlags(interactive = false)
+            } else {
+                btnLock.setImageResource(R.drawable.ic_lock_open)
+                btnLock.clearColorFilter()
+                
+                // Restore controls if not clicking
+                if (!isPlaying) {
+                    btnAdd.isEnabled = true
+                    btnAdd.alpha = 1.0f
+                    btnClose.isEnabled = true
+                    btnClose.alpha = 1.0f
+                    updateTargetFlags(interactive = true)
+                }
+            }
+        }
+
+        btnMinimize.setOnClickListener {
+            isMinimized = !isMinimized
+            if (isMinimized) {
+                btnPlay.visibility = View.GONE
+                btnAdd.visibility = View.GONE
+                btnLock.visibility = View.GONE
+                btnClose.visibility = View.GONE
+                btnMinimize.setColorFilter(getColor(R.color.accent))
+
+                // Fade targets to avoid blocking sight
+                targets.forEach { it.view?.alpha = 0.2f }
+            } else {
+                btnPlay.visibility = View.VISIBLE
+                btnAdd.visibility = View.VISIBLE
+                btnLock.visibility = View.VISIBLE
+                btnClose.visibility = View.VISIBLE
+                btnMinimize.clearColorFilter()
+
+                // Restore targets opacity
+                targets.forEach { it.view?.alpha = 1.0f }
+            }
+        }
+
+        btnClose.setOnClickListener {
+            hideOverlay()
+        }
+    }
+
+    private fun addNewTarget() {
+        val id = targetIdCounter++
+        val layoutParamsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutParamsType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        )
+
+        params.gravity = Gravity.TOP or Gravity.START
+        params.x = 250
+        params.y = 400
+
+        val inflater = LayoutInflater.from(this)
+        val targetView = inflater.inflate(R.layout.layout_click_target, null)
+        val txtNumber = targetView.findViewById<TextView>(R.id.txt_target_number)
+        txtNumber.text = id.toString()
+
+        val target = ClickTarget(
+            id = id,
+            x = params.x,
+            y = params.y,
+            view = targetView
+        )
+
+        targetView.setOnTouchListener(createTargetTouchListener(target, params))
+        targets.add(target)
+
+        windowManager.addView(targetView, params)
+    }
+
+    private fun removeTarget(target: ClickTarget) {
+        target.job?.cancel()
+        target.view?.let {
+            try {
+                windowManager.removeView(it)
+            } catch (e: Exception) {
+                // View might already be detached
+            }
+        }
+        targets.remove(target)
+    }
+
+    private fun createTargetTouchListener(target: ClickTarget, params: WindowManager.LayoutParams): View.OnTouchListener {
+        var initialX = 0
+        var initialY = 0
+        var initialTouchX = 0f
+        var initialTouchY = 0f
+        var isClick = false
+
+        return View.OnTouchListener { view, event ->
+            // Prevent interaction if currently running clicks or locked
+            if (isPlaying || isLocked) return@OnTouchListener false
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    isClick = true
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.rawX - initialTouchX
+                    val dy = event.rawY - initialTouchY
+
+                    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                        isClick = false
+                    }
+
+                    params.x = (initialX + dx).toInt()
+                    params.y = (initialY + dy).toInt()
+                    windowManager.updateViewLayout(view, params)
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (isClick) {
+                        showTargetSettingsDialog(target)
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun showTargetSettingsDialog(target: ClickTarget) {
+        if (isPlaying || isLocked) return
+
+        val dialogContext = ContextThemeWrapper(this, R.style.Theme_AutoclikProMax)
+        val builder = AlertDialog.Builder(dialogContext)
+        val inflater = LayoutInflater.from(dialogContext)
+        val dialogView = inflater.inflate(R.layout.dialog_target_settings, null)
+
+        val txtTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
+        val editInterval = dialogView.findViewById<EditText>(R.id.edit_interval)
+        val btnDelete = dialogView.findViewById<Button>(R.id.btn_delete_target)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btn_cancel_target)
+        val btnSave = dialogView.findViewById<Button>(R.id.btn_save_target)
+
+        txtTitle.text = getString(R.string.dialog_settings_title, target.id)
+        editInterval.setText(target.intervalMs.toString())
+
+        val dialog = builder.setView(dialogView).create()
+        dialog.window?.setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY)
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnDelete.setOnClickListener {
+            removeTarget(target)
+            dialog.dismiss()
+        }
+
+        btnSave.setOnClickListener {
+            val input = editInterval.text.toString()
+            val interval = input.toLongOrNull()
+            if (interval != null && interval >= 10L) {
+                target.intervalMs = interval
+                dialog.dismiss()
+            } else {
+                editInterval.error = getString(R.string.invalid_interval)
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun startClicking() {
+        if (targets.isEmpty()) return
+
+        isPlaying = true
+        controlPanelView?.findViewById<ImageView>(R.id.btn_play)?.setImageResource(R.drawable.ic_pause)
+
+        // Lock interface actions to protect overlays
+        controlPanelView?.findViewById<ImageView>(R.id.btn_close)?.let {
+            it.isEnabled = false
+            it.alpha = 0.4f
+        }
+        controlPanelView?.findViewById<ImageView>(R.id.btn_add)?.let {
+            it.isEnabled = false
+            it.alpha = 0.4f
+        }
+
+        // Set layout flags on targets so they pass-through touches
+        updateTargetFlags(interactive = false)
+
+        // Start independent coroutine for each target
+        for (target in targets) {
+            target.job = serviceScope.launch {
+                // Dispatch click at target center relative to screen
+                while (isActive && isPlaying) {
+                    val view = target.view
+                    if (view != null) {
+                        val location = IntArray(2)
+                        view.getLocationOnScreen(location)
+                        val clickX = location[0] + view.width / 2
+                        val clickY = location[1] + view.height / 2
+                        
+                        dispatchClickAt(clickX, clickY)
+                    }
+                    delay(target.intervalMs)
+                }
+            }
+        }
+    }
+
+    private fun stopClicking() {
+        isPlaying = false
+        controlPanelView?.findViewById<ImageView>(R.id.btn_play)?.setImageResource(R.drawable.ic_play)
+
+        // Restore interface options
+        if (!isLocked) {
+            controlPanelView?.findViewById<ImageView>(R.id.btn_close)?.let {
+                it.isEnabled = true
+                it.alpha = 1.0f
+            }
+            controlPanelView?.findViewById<ImageView>(R.id.btn_add)?.let {
+                it.isEnabled = true
+                it.alpha = 1.0f
+            }
+            updateTargetFlags(interactive = true)
+        }
+
+        // Stop all clicking coroutines
+        for (target in targets) {
+            target.job?.cancel()
+            target.job = null
+        }
+    }
+
+    private fun updateTargetFlags(interactive: Boolean) {
+        for (target in targets) {
+            val view = target.view ?: continue
+            val params = view.layoutParams as WindowManager.LayoutParams
+            if (interactive) {
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            } else {
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            }
+            try {
+                windowManager.updateViewLayout(view, params)
+            } catch (e: Exception) {
+                // In case view is detached
+            }
+        }
+    }
+
+    private fun dispatchClickAt(x: Int, y: Int) {
+        val path = Path()
+        path.moveTo(x.toFloat(), y.toFloat())
+        
+        val gestureBuilder = GestureDescription.Builder()
+        // Clicks need a brief stroke duration to register on Android correctly. 50ms is ideal.
+        gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, 50))
+        
+        dispatchGesture(gestureBuilder.build(), null, null)
+    }
+}

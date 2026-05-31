@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Autoclik Pro Max</string>
+    <string name="accessibility_service_description">Este servicio es necesario para simular toques automáticos independientes en la pantalla según tu configuración personalizada.</string>
+    <string name="perm_accessibility_title">Servicio de Accesibilidad</string>
+    <string name="perm_accessibility_desc">Permite que la app simule clics en la pantalla.</string>
+    <string name="perm_overlay_title">Superposición de Pantalla</string>
+    <string name="perm_overlay_desc">Permite mostrar los botones y paneles flotantes sobre otras aplicaciones.</string>
+    <string name="btn_grant">Conceder Permiso</string>
+    <string name="btn_granted">Permiso Activo</string>
+    <string name="service_status_ready">¡Todo listo! Haz clic en Iniciar para ver el panel flotante.</string>
+    <string name="service_status_pending">Por favor, concede todos los permisos para continuar.</string>
+    <string name="btn_start_service">Iniciar Panel Flotante</string>
+    <string name="btn_stop_service">Detener Panel Flotante</string>
+    <string name="app_intro">Un autoclicker ultra rápido y premium que ejecuta múltiples botones a la vez de forma independiente e ilimitada.</string>
+    
+    <!-- Target Settings Dialog -->
+    <string name="dialog_settings_title">Configurar Clic #%1$d</string>
+    <string name="dialog_settings_interval_label">Intervalo de pulsación (milisegundos):</string>
+    <string name="dialog_settings_save">Guardar</string>
+    <string name="dialog_settings_cancel">Cancelar</string>
+    <string name="invalid_interval">El intervalo debe ser de al menos 10ms.</string>
+</resources>
