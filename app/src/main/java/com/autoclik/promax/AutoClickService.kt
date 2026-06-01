@@ -30,6 +30,7 @@ class AutoClickService : AccessibilityService() {
     private var isPlaying = false
     private var isLocked = false
     private var isMinimized = false
+    private var isAntiDetectEnabled = false
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -130,6 +131,7 @@ class AutoClickService : AccessibilityService() {
         val btnLock = view.findViewById<ImageView>(R.id.btn_lock)
         val btnMinimize = view.findViewById<ImageView>(R.id.btn_minimize)
         val btnClose = view.findViewById<ImageView>(R.id.btn_close)
+        val btnAntiDetect = view.findViewById<ImageView>(R.id.btn_anti_detect)
 
         // Control Panel Drag Listener
         var initialX = 0
@@ -205,6 +207,7 @@ class AutoClickService : AccessibilityService() {
                 btnAdd.visibility = View.GONE
                 btnLock.visibility = View.GONE
                 btnClose.visibility = View.GONE
+                btnAntiDetect.visibility = View.GONE
                 btnMinimize.setColorFilter(getColor(R.color.accent))
 
                 // Fade targets to avoid blocking sight
@@ -214,10 +217,20 @@ class AutoClickService : AccessibilityService() {
                 btnAdd.visibility = View.VISIBLE
                 btnLock.visibility = View.VISIBLE
                 btnClose.visibility = View.VISIBLE
+                btnAntiDetect.visibility = View.VISIBLE
                 btnMinimize.clearColorFilter()
 
                 // Restore targets opacity
                 targets.forEach { it.view?.alpha = 1.0f }
+            }
+        }
+
+        btnAntiDetect.setOnClickListener {
+            isAntiDetectEnabled = !isAntiDetectEnabled
+            if (isAntiDetectEnabled) {
+                btnAntiDetect.setColorFilter(getColor(R.color.green_success))
+            } else {
+                btnAntiDetect.clearColorFilter()
             }
         }
 
@@ -416,12 +429,28 @@ class AutoClickService : AccessibilityService() {
                     if (view != null) {
                         val location = IntArray(2)
                         view.getLocationOnScreen(location)
-                        val clickX = location[0] + view.width / 2
-                        val clickY = location[1] + view.height / 2
+                        var clickX = location[0] + view.width / 2
+                        var clickY = location[1] + view.height / 2
+                        
+                        if (isAntiDetectEnabled) {
+                            // Add small random tremor coordinates offset (-4 to +4 pixels)
+                            clickX += (-4..4).random()
+                            clickY += (-4..4).random()
+                        }
                         
                         dispatchClickAt(clickX, clickY)
                     }
-                    delay(target.intervalMs)
+                    
+                    val baseDelay = target.intervalMs
+                    val delayMs = if (isAntiDetectEnabled && baseDelay > 200L) {
+                        // Add random time jitter (-10% to +10% of base interval)
+                        val maxJitter = (baseDelay * 0.1).toLong()
+                        baseDelay + (-maxJitter..maxJitter).random()
+                    } else {
+                        baseDelay
+                    }
+                    
+                    delay(maxOf(10L, delayMs))
                 }
             }
         }
