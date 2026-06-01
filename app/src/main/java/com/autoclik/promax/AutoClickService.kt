@@ -100,6 +100,7 @@ class AutoClickService : AccessibilityService() {
         setupControlPanelListeners(controlPanelView!!)
 
         windowManager.addView(controlPanelView, params)
+        loadConfiguration()
     }
 
     fun hideOverlay() {
@@ -263,6 +264,7 @@ class AutoClickService : AccessibilityService() {
         targets.add(target)
 
         windowManager.addView(targetView, params)
+        saveConfiguration()
     }
 
     private fun removeTarget(target: ClickTarget) {
@@ -313,6 +315,10 @@ class AutoClickService : AccessibilityService() {
                 MotionEvent.ACTION_UP -> {
                     if (isClick) {
                         showTargetSettingsDialog(target)
+                    } else {
+                        target.x = params.x
+                        target.y = params.y
+                        saveConfiguration()
                     }
                     true
                 }
@@ -360,6 +366,7 @@ class AutoClickService : AccessibilityService() {
 
         btnDelete.setOnClickListener {
             removeTarget(target)
+            saveConfiguration()
             dialog.dismiss()
         }
 
@@ -371,6 +378,7 @@ class AutoClickService : AccessibilityService() {
             val calculatedTotalMs = (minsVal * 60000L) + (secsVal * 1000L) + msVal
             if (calculatedTotalMs >= 10L) {
                 target.intervalMs = calculatedTotalMs
+                saveConfiguration()
                 dialog.dismiss()
             } else {
                 editMilliseconds.error = getString(R.string.invalid_interval)
@@ -472,5 +480,81 @@ class AutoClickService : AccessibilityService() {
         gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, 50))
         
         dispatchGesture(gestureBuilder.build(), null, null)
+    }
+
+    private fun saveConfiguration() {
+        val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
+        val serialized = targets.joinToString("|") { "${it.id};${it.x};${it.y};${it.intervalMs}" }
+        prefs.edit().putString("saved_targets", serialized).apply()
+    }
+
+    private fun loadConfiguration() {
+        val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
+        val serialized = prefs.getString("saved_targets", "") ?: ""
+        if (serialized.isEmpty()) return
+
+        // Clear current screen targets if any (to avoid duplicates)
+        val targetsCopy = ArrayList(targets)
+        for (t in targetsCopy) {
+            removeTarget(t)
+        }
+        targets.clear()
+
+        var maxId = 0
+        val parts = serialized.split("|")
+        for (part in parts) {
+            val fields = part.split(";")
+            if (fields.size == 4) {
+                val id = fields[0].toIntOrNull() ?: continue
+                val x = fields[1].toIntOrNull() ?: continue
+                val y = fields[2].toIntOrNull() ?: continue
+                val intervalMs = fields[3].toLongOrNull() ?: continue
+
+                if (id > maxId) maxId = id
+
+                restoreTarget(id, x, y, intervalMs)
+            }
+        }
+        targetIdCounter = maxId + 1
+    }
+
+    private fun restoreTarget(id: Int, x: Int, y: Int, intervalMs: Long) {
+        val layoutParamsType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            layoutParamsType,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        )
+
+        params.gravity = Gravity.TOP or Gravity.START
+        params.x = x
+        params.y = y
+
+        val themedContext = ContextThemeWrapper(this, R.style.Theme_AutoclikProMax)
+        val inflater = LayoutInflater.from(themedContext)
+        val targetView = inflater.inflate(R.layout.layout_click_target, null)
+        val txtNumber = targetView.findViewById<TextView>(R.id.txt_target_number)
+        txtNumber.text = id.toString()
+
+        val target = ClickTarget(
+            id = id,
+            x = x,
+            y = y,
+            intervalMs = intervalMs,
+            view = targetView
+        )
+
+        targetView.setOnTouchListener(createTargetTouchListener(target, params))
+        targets.add(target)
+
+        windowManager.addView(targetView, params)
     }
 }
