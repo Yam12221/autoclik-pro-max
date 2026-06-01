@@ -15,7 +15,6 @@
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_bottom="16dp"
         android:layout_marginBottom="16dp" />
 
     <!-- Label -->
