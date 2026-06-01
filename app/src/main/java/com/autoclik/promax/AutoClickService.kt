@@ -30,7 +30,7 @@ class AutoClickService : AccessibilityService() {
     private var isPlaying = false
     private var isLocked = false
     private var isMinimized = false
-    private var isAntiDetectEnabled = false
+    private val isAntiDetectEnabled = true
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -131,7 +131,6 @@ class AutoClickService : AccessibilityService() {
         val btnLock = view.findViewById<ImageView>(R.id.btn_lock)
         val btnMinimize = view.findViewById<ImageView>(R.id.btn_minimize)
         val btnClose = view.findViewById<ImageView>(R.id.btn_close)
-        val btnAntiDetect = view.findViewById<ImageView>(R.id.btn_anti_detect)
 
         // Control Panel Drag Listener
         var initialX = 0
@@ -207,7 +206,6 @@ class AutoClickService : AccessibilityService() {
                 btnAdd.visibility = View.GONE
                 btnLock.visibility = View.GONE
                 btnClose.visibility = View.GONE
-                btnAntiDetect.visibility = View.GONE
                 btnMinimize.setColorFilter(getColor(R.color.accent))
 
                 // Fade targets to avoid blocking sight
@@ -217,20 +215,10 @@ class AutoClickService : AccessibilityService() {
                 btnAdd.visibility = View.VISIBLE
                 btnLock.visibility = View.VISIBLE
                 btnClose.visibility = View.VISIBLE
-                btnAntiDetect.visibility = View.VISIBLE
                 btnMinimize.clearColorFilter()
 
                 // Restore targets opacity
                 targets.forEach { it.view?.alpha = 1.0f }
-            }
-        }
-
-        btnAntiDetect.setOnClickListener {
-            isAntiDetectEnabled = !isAntiDetectEnabled
-            if (isAntiDetectEnabled) {
-                btnAntiDetect.setColorFilter(getColor(R.color.green_success))
-            } else {
-                btnAntiDetect.clearColorFilter()
             }
         }
 
