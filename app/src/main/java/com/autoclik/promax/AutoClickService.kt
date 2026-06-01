@@ -102,6 +102,7 @@ class AutoClickService : AccessibilityService() {
 
         windowManager.addView(controlPanelView, params)
         loadConfiguration()
+        updateAddButtonVisibility()
     }
 
     fun hideOverlay() {
@@ -177,9 +178,6 @@ class AutoClickService : AccessibilityService() {
             if (isLocked) {
                 btnLock.setImageResource(R.drawable.ic_lock_closed)
                 btnLock.setColorFilter(getColor(R.color.accent))
-                // Disable controls
-                btnAdd.isEnabled = false
-                btnAdd.alpha = 0.4f
                 btnClose.isEnabled = false
                 btnClose.alpha = 0.4f
                 // Apply touchable flags to targets
@@ -190,20 +188,18 @@ class AutoClickService : AccessibilityService() {
                 
                 // Restore controls if not clicking
                 if (!isPlaying) {
-                    btnAdd.isEnabled = true
-                    btnAdd.alpha = 1.0f
                     btnClose.isEnabled = true
                     btnClose.alpha = 1.0f
                     updateTargetFlags(interactive = true)
                 }
             }
+            updateAddButtonVisibility()
         }
 
         btnMinimize.setOnClickListener {
             isMinimized = !isMinimized
             if (isMinimized) {
                 btnPlay.visibility = View.GONE
-                btnAdd.visibility = View.GONE
                 btnLock.visibility = View.GONE
                 btnClose.visibility = View.GONE
                 btnMinimize.setColorFilter(getColor(R.color.accent))
@@ -212,7 +208,6 @@ class AutoClickService : AccessibilityService() {
                 targets.forEach { it.view?.alpha = 0.2f }
             } else {
                 btnPlay.visibility = View.VISIBLE
-                btnAdd.visibility = View.VISIBLE
                 btnLock.visibility = View.VISIBLE
                 btnClose.visibility = View.VISIBLE
                 btnMinimize.clearColorFilter()
@@ -220,6 +215,7 @@ class AutoClickService : AccessibilityService() {
                 // Restore targets opacity
                 targets.forEach { it.view?.alpha = 1.0f }
             }
+            updateAddButtonVisibility()
         }
 
         btnClose.setOnClickListener {
@@ -400,10 +396,8 @@ class AutoClickService : AccessibilityService() {
             it.isEnabled = false
             it.alpha = 0.4f
         }
-        controlPanelView?.findViewById<ImageView>(R.id.btn_add)?.let {
-            it.isEnabled = false
-            it.alpha = 0.4f
-        }
+        
+        updateAddButtonVisibility()
 
         // Set layout flags on targets so they pass-through touches
         updateTargetFlags(interactive = false)
@@ -454,12 +448,10 @@ class AutoClickService : AccessibilityService() {
                 it.isEnabled = true
                 it.alpha = 1.0f
             }
-            controlPanelView?.findViewById<ImageView>(R.id.btn_add)?.let {
-                it.isEnabled = true
-                it.alpha = 1.0f
-            }
             updateTargetFlags(interactive = true)
         }
+        
+        updateAddButtonVisibility()
 
         // Stop all clicking coroutines
         for (target in targets) {
@@ -499,15 +491,32 @@ class AutoClickService : AccessibilityService() {
         dispatchGesture(gestureBuilder.build(), null, null)
     }
 
+    fun updateAddButtonVisibility() {
+        val view = controlPanelView ?: return
+        val btnAdd = view.findViewById<ImageView>(R.id.btn_add) ?: return
+        val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
+        val showAddSetting = prefs.getBoolean("show_add_button", true)
+
+        if (isMinimized || isPlaying || isLocked || !showAddSetting) {
+            btnAdd.visibility = View.GONE
+        } else {
+            btnAdd.visibility = View.VISIBLE
+            btnAdd.isEnabled = true
+            btnAdd.alpha = 1.0f
+        }
+    }
+
     private fun saveConfiguration() {
         val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
+        val activeProfileId = prefs.getInt("active_profile_id", 1)
         val serialized = targets.joinToString("|") { "${it.id};${it.x};${it.y};${it.intervalMs}" }
-        prefs.edit().putString("saved_targets", serialized).apply()
+        prefs.edit().putString("saved_targets_$activeProfileId", serialized).apply()
     }
 
     private fun loadConfiguration() {
         val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
-        val serialized = prefs.getString("saved_targets", "") ?: ""
+        val activeProfileId = prefs.getInt("active_profile_id", 1)
+        val serialized = prefs.getString("saved_targets_$activeProfileId", "") ?: ""
         if (serialized.isEmpty()) return
 
         // Clear current screen targets if any (to avoid duplicates)

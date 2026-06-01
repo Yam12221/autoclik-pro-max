@@ -6,17 +6,27 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.autoclik.promax.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var selectedProfileId = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Load previously selected profile
+        val prefs = getSharedPreferences("AutoclikPrefs", Context.MODE_PRIVATE)
+        selectedProfileId = prefs.getInt("active_profile_id", 1)
+        updateProfileUi(selectedProfileId)
+
+        val showAddBtn = prefs.getBoolean("show_add_button", true)
+        binding.switchShowAddButton.isChecked = showAddBtn
 
         setupListeners()
     }
@@ -27,6 +37,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
+        val prefs = getSharedPreferences("AutoclikPrefs", Context.MODE_PRIVATE)
+        binding.switchShowAddButton.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("show_add_button", isChecked).apply()
+            val service = AutoClickService.instance
+            if (service != null && service.isOverlayShowing()) {
+                service.updateAddButtonVisibility()
+            }
+        }
+
         binding.btnGrantAccessibility.setOnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
@@ -50,6 +69,61 @@ class MainActivity : AppCompatActivity() {
                     service.showOverlay()
                     updateServiceUi(true, isOverlayShowing = true)
                 }
+            }
+        }
+
+        // Profile Selection Listeners
+        binding.btnProfile1.setOnClickListener { selectProfile(1) }
+        binding.btnProfile2.setOnClickListener { selectProfile(2) }
+        binding.btnProfile3.setOnClickListener { selectProfile(3) }
+    }
+
+    private fun selectProfile(profileId: Int) {
+        selectedProfileId = profileId
+        val prefs = getSharedPreferences("AutoclikPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putInt("active_profile_id", profileId).apply()
+        
+        updateProfileUi(profileId)
+        
+        // If service is currently active, we tell it to reload the new configuration
+        val service = AutoClickService.instance
+        if (service != null && service.isOverlayShowing()) {
+            service.hideOverlay()
+            service.showOverlay()
+            updateServiceUi(true, isOverlayShowing = true)
+        }
+    }
+
+    private fun updateProfileUi(activeId: Int) {
+        val activeColor = getColor(R.color.primary)
+        val inactiveColor = getColor(R.color.surface_border)
+        
+        val activeTextColor = getColor(R.color.text_primary)
+        val inactiveTextColor = getColor(R.color.text_secondary)
+
+        // Reset all buttons
+        binding.btnProfile1.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnProfile1.setTextColor(inactiveTextColor)
+        
+        binding.btnProfile2.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnProfile2.setTextColor(inactiveTextColor)
+        
+        binding.btnProfile3.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnProfile3.setTextColor(inactiveTextColor)
+
+        // Highlight selected
+        when (activeId) {
+            1 -> {
+                binding.btnProfile1.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnProfile1.setTextColor(activeTextColor)
+            }
+            2 -> {
+                binding.btnProfile2.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnProfile2.setTextColor(activeTextColor)
+            }
+            3 -> {
+                binding.btnProfile3.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnProfile3.setTextColor(activeTextColor)
             }
         }
     }
