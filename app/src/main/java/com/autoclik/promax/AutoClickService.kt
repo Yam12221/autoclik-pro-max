@@ -330,13 +330,26 @@ class AutoClickService : AccessibilityService() {
         val dialogView = inflater.inflate(R.layout.dialog_target_settings, null)
 
         val txtTitle = dialogView.findViewById<TextView>(R.id.dialog_title)
-        val editInterval = dialogView.findViewById<EditText>(R.id.edit_interval)
+        val editMinutes = dialogView.findViewById<EditText>(R.id.edit_minutes)
+        val editSeconds = dialogView.findViewById<EditText>(R.id.edit_seconds)
+        val editMilliseconds = dialogView.findViewById<EditText>(R.id.edit_milliseconds)
+        
         val btnDelete = dialogView.findViewById<Button>(R.id.btn_delete_target)
         val btnCancel = dialogView.findViewById<Button>(R.id.btn_cancel_target)
         val btnSave = dialogView.findViewById<Button>(R.id.btn_save_target)
 
         txtTitle.text = getString(R.string.dialog_settings_title, target.id)
-        editInterval.setText(target.intervalMs.toString())
+        
+        // Calculate minutes, seconds and milliseconds from total target interval
+        val totalMs = target.intervalMs
+        val mins = totalMs / 60000L
+        val remaining = totalMs % 60000L
+        val secs = remaining / 1000L
+        val ms = remaining % 1000L
+
+        editMinutes.setText(mins.toString())
+        editSeconds.setText(secs.toString())
+        editMilliseconds.setText(ms.toString())
 
         val dialog = builder.setView(dialogView).create()
         dialog.window?.setType(WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY)
@@ -351,13 +364,16 @@ class AutoClickService : AccessibilityService() {
         }
 
         btnSave.setOnClickListener {
-            val input = editInterval.text.toString()
-            val interval = input.toLongOrNull()
-            if (interval != null && interval >= 10L) {
-                target.intervalMs = interval
+            val minsVal = editMinutes.text.toString().toLongOrNull() ?: 0L
+            val secsVal = editSeconds.text.toString().toLongOrNull() ?: 0L
+            val msVal = editMilliseconds.text.toString().toLongOrNull() ?: 0L
+
+            val calculatedTotalMs = (minsVal * 60000L) + (secsVal * 1000L) + msVal
+            if (calculatedTotalMs >= 10L) {
+                target.intervalMs = calculatedTotalMs
                 dialog.dismiss()
             } else {
-                editInterval.error = getString(R.string.invalid_interval)
+                editMilliseconds.error = getString(R.string.invalid_interval)
             }
         }
 

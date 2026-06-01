@@ -15,29 +15,109 @@
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:layout_bottom="16dp"
         android:layout_marginBottom="16dp" />
 
     <!-- Label -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Intervalo de clic (milisegundos):"
+        android:text="Intervalo de clic (Tiempo entre pulsaciones):"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="12dp" />
 
-    <!-- Interval Input -->
-    <EditText
-        android:id="@+id/edit_interval"
+    <!-- Timer Pickers Row -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:inputType="number"
-        android:text="1000"
-        android:textColor="@color/text_primary"
-        android:background="@drawable/bg_card"
-        android:padding="12dp"
-        android:textSize="16sp"
-        android:layout_marginBottom="20dp" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:layout_marginBottom="24dp">
+
+        <!-- Minutes -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Minutos"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="4dp" />
+            <EditText
+                android:id="@+id/edit_minutes"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/text_primary"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Seconds -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="6dp"
+            android:layout_marginStart="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Segundos"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="4dp" />
+            <EditText
+                android:id="@+id/edit_seconds"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:inputType="number"
+                android:text="1"
+                android:textColor="@color/text_primary"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Milliseconds -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="6dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Milisegundos"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="4dp" />
+            <EditText
+                android:id="@+id/edit_milliseconds"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/text_primary"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+    </LinearLayout>
 
     <!-- Buttons row -->
     <LinearLayout
