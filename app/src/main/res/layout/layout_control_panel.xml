@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/panel_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_floating_panel"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <!-- Drag Handle -->
+    <ImageView
+        android:id="@+id/img_drag"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/ic_drag"
+        android:layout_marginEnd="4dp"
+        android:padding="4dp"
+        android:contentDescription="Arrastrar" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:background="@color/float_border"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Add Pair Button (+) -->
+    <ImageView
+        android:id="@+id/btn_add_pair"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_add"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginEnd="8dp"
+        android:padding="6dp"
+        android:contentDescription="Agregar pareja reubicadora" />
+
+    <!-- Lock Toggle Button -->
+    <ImageView
+        android:id="@+id/btn_lock"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_lock_open"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginEnd="8dp"
+        android:padding="6dp"
+        android:contentDescription="Bloquear" />
+
+    <!-- Visibility / Opacity Minimize Button -->
+    <ImageView
+        android:id="@+id/btn_minimize"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_visibility"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginEnd="8dp"
+        android:padding="6dp"
+        android:contentDescription="Minimizar" />
+
+    <!-- Profile Selector Badge -->
+    <TextView
+        android:id="@+id/btn_profile_badge"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:text="P1"
+        android:textColor="@color/text_primary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/bg_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="Cambiar Perfil" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="1dp"
+        android:layout_height="24dp"
+        android:background="@color/float_border"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Close Button -->
+    <ImageView
+        android:id="@+id/btn_close"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_close"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="6dp"
+        android:contentDescription="Cerrar" />
+
+</LinearLayout>

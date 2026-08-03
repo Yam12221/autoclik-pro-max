@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Reubicador de Botones Pro</string>
+    <string name="accessibility_service_label">Servicio Reubicador Táctil Pro</string>
+    <string name="accessibility_service_desc">Servicio de accesibilidad para interceptar pulsaciones en botones flotantes falsos y transmitirlas de forma instantánea al botón real del juego con protección anti-baneo.</string>
+
+    <string name="perm_accessibility_title">1. Servicio de Accesibilidad</string>
+    <string name="perm_accessibility_desc">Requerido para simular toques en pantalla y transmitir señales táctiles al juego.</string>
+    <string name="perm_overlay_title">2. Mostrar sobre otras apps</string>
+    <string name="perm_overlay_desc">Requerido para mostrar los botones flotantes de reubicación sobre el juego.</string>
+
+    <string name="btn_grant">Conceder Permiso</string>
+    <string name="btn_granted">Concedido</string>
+    <string name="btn_start_service">Iniciar Reubicador Flotante</string>
+    <string name="btn_stop_service">Detener Reubicador Flotante</string>
+    <string name="service_status_ready">Servicio listo para ejecutar</string>
+    <string name="service_status_pending">Se requieren ambos permisos para activar el servicio</string>
+</resources>
