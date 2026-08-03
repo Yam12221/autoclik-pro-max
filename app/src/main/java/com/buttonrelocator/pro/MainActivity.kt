@@ -2,6 +2,7 @@ package com.buttonrelocator.pro
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -95,24 +96,24 @@ class MainActivity : AppCompatActivity() {
         val activeTextColor = getColor(R.color.text_primary)
         val inactiveTextColor = getColor(R.color.text_secondary)
 
-        binding.btnLevelStealth.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnLevelStealth.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
         binding.btnLevelStealth.setTextColor(inactiveTextColor)
-        binding.btnLevelBalanced.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnLevelBalanced.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
         binding.btnLevelBalanced.setTextColor(inactiveTextColor)
-        binding.btnLevelDirect.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnLevelDirect.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
         binding.btnLevelDirect.setTextColor(inactiveTextColor)
 
         when (level) {
             AntiDetectEngine.SecurityLevel.STEALTH -> {
-                binding.btnLevelStealth.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnLevelStealth.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
                 binding.btnLevelStealth.setTextColor(activeTextColor)
             }
             AntiDetectEngine.SecurityLevel.BALANCED -> {
-                binding.btnLevelBalanced.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnLevelBalanced.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
                 binding.btnLevelBalanced.setTextColor(activeTextColor)
             }
             AntiDetectEngine.SecurityLevel.DIRECT -> {
-                binding.btnLevelDirect.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnLevelDirect.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
                 binding.btnLevelDirect.setTextColor(activeTextColor)
             }
         }
@@ -137,24 +138,24 @@ class MainActivity : AppCompatActivity() {
         val activeTextColor = getColor(R.color.text_primary)
         val inactiveTextColor = getColor(R.color.text_secondary)
 
-        binding.btnProfile1.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnProfile1.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
         binding.btnProfile1.setTextColor(inactiveTextColor)
-        binding.btnProfile2.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnProfile2.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
         binding.btnProfile2.setTextColor(inactiveTextColor)
-        binding.btnProfile3.backgroundTintList = getColorStateList(R.color.surface_border)
+        binding.btnProfile3.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
         binding.btnProfile3.setTextColor(inactiveTextColor)
 
         when (activeId) {
             1 -> {
-                binding.btnProfile1.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnProfile1.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
                 binding.btnProfile1.setTextColor(activeTextColor)
             }
             2 -> {
-                binding.btnProfile2.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnProfile2.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
                 binding.btnProfile2.setTextColor(activeTextColor)
             }
             3 -> {
-                binding.btnProfile3.backgroundTintList = getColorStateList(R.color.primary)
+                binding.btnProfile3.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
                 binding.btnProfile3.setTextColor(activeTextColor)
             }
         }
@@ -210,7 +211,7 @@ class MainActivity : AppCompatActivity() {
             binding.txtServiceStatus.setTextColor(getColor(R.color.text_secondary))
             binding.btnToggleService.isEnabled = false
             binding.btnToggleService.text = getString(R.string.btn_start_service)
-            binding.btnToggleService.backgroundTintList = getColorStateList(R.color.text_secondary)
+            binding.btnToggleService.backgroundTintList = ColorStateList.valueOf(getColor(R.color.text_secondary))
         } else {
             binding.txtServiceStatus.text = getString(R.string.service_status_ready)
             binding.txtServiceStatus.setTextColor(getColor(R.color.text_primary))
@@ -218,10 +219,10 @@ class MainActivity : AppCompatActivity() {
             
             if (isOverlayShowing) {
                 binding.btnToggleService.text = getString(R.string.btn_stop_service)
-                binding.btnToggleService.backgroundTintList = getColorStateList(R.color.red_error)
+                binding.btnToggleService.backgroundTintList = ColorStateList.valueOf(getColor(R.color.red_error))
             } else {
                 binding.btnToggleService.text = getString(R.string.btn_start_service)
-                binding.btnToggleService.backgroundTintList = getColorStateList(R.color.accent)
+                binding.btnToggleService.backgroundTintList = ColorStateList.valueOf(getColor(R.color.accent))
             }
         }
     }
