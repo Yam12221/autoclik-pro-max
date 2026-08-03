@@ -338,6 +338,7 @@ class RelocatorService : AccessibilityService() {
         var initialTouchX = 0f
         var initialTouchY = 0f
         var isClick = false
+        var longPressJob: Job? = null
 
         return View.OnTouchListener { view, event ->
             if (isLocked) return@OnTouchListener false
@@ -349,14 +350,25 @@ class RelocatorService : AccessibilityService() {
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
                     isClick = true
+
+                    // Lanzar toque largo (600ms) para evitar que arrastres accidentales disparen el diálogo de eliminación
+                    longPressJob = serviceScope.launch {
+                        delay(600)
+                        if (isClick) {
+                            showPairDeleteDialog(pair)
+                        }
+                    }
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = event.rawX - initialTouchX
                     val dy = event.rawY - initialTouchY
 
-                    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                    // Umbral adaptativo a la densidad de pantalla para cancelar clics
+                    val threshold = 8 * resources.displayMetrics.density
+                    if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
                         isClick = false
+                        longPressJob?.cancel()
                     }
 
                     params.x = (initialX + dx).toInt()
@@ -365,13 +377,16 @@ class RelocatorService : AccessibilityService() {
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (isClick) {
-                        showPairDeleteDialog(pair)
-                    } else {
+                    longPressJob?.cancel()
+                    if (!isClick) {
                         pair.targetX = params.x
                         pair.targetY = params.y
                         saveConfiguration()
                     }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    longPressJob?.cancel()
                     true
                 }
                 else -> false
@@ -399,10 +414,14 @@ class RelocatorService : AccessibilityService() {
 
     private fun triggerRemapSignal(pair: ButtonPair) {
         val targetView = pair.targetView ?: return
-        val location = IntArray(2)
-        targetView.getLocationOnScreen(location)
-        val targetCenterX = location[0] + targetView.width / 2
-        val targetCenterY = location[1] + targetView.height / 2
+        
+        // Calcular centro usando layoutParams deterministas de pantalla en lugar de getLocationOnScreen que puede fallar en overlays
+        val density = resources.displayMetrics.density
+        val targetWidth = targetView.width.takeIf { it > 0 } ?: (44 * density).toInt()
+        val targetHeight = targetView.height.takeIf { it > 0 } ?: (44 * density).toInt()
+        
+        val targetCenterX = pair.targetX + targetWidth / 2
+        val targetCenterY = pair.targetY + targetHeight / 2
 
         val prefs = getSharedPreferences("RelocatorPrefs", MODE_PRIVATE)
         val isAntiDetect = prefs.getBoolean("antidetections_enabled", true)
