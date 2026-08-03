@@ -423,6 +423,15 @@ class RelocatorService : AccessibilityService() {
         val targetCenterX = pair.targetX + targetWidth / 2
         val targetCenterY = pair.targetY + targetHeight / 2
 
+        // Destello visual en el puntero R1 para confirmar que se detectó la pulsación
+        val txtTargetNum = targetView.findViewById<TextView>(R.id.txt_target_number)
+        txtTargetNum?.post {
+            txtTargetNum.setBackgroundResource(R.drawable.bg_circle_trigger)
+            txtTargetNum.postDelayed({
+                txtTargetNum.setBackgroundResource(R.drawable.bg_circle_target)
+            }, 120)
+        }
+
         val prefs = getSharedPreferences("RelocatorPrefs", MODE_PRIVATE)
         val isAntiDetect = prefs.getBoolean("antidetections_enabled", true)
         val levelStr = prefs.getString("security_level", "STEALTH") ?: "STEALTH"
@@ -454,7 +463,31 @@ class RelocatorService : AccessibilityService() {
         val gestureBuilder = GestureDescription.Builder()
         gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, maxOf(1L, durationMs)))
         
-        dispatchGesture(gestureBuilder.build(), null, null)
+        val success = dispatchGesture(gestureBuilder.build(), object : AccessibilityService.GestureResultCallback() {
+            override fun onCompleted(gestureDescription: GestureDescription?) {
+                super.onCompleted(gestureDescription)
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    android.widget.Toast.makeText(applicationContext, "Clic inyectado en ($x, $y)", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onCancelled(gestureDescription: GestureDescription?) {
+                super.onCancelled(gestureDescription)
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    android.widget.Toast.makeText(applicationContext, "Clic cancelado por el sistema", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        }, null)
+
+        if (!success) {
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                android.widget.Toast.makeText(
+                    applicationContext,
+                    "Error: No se pudo inyectar el clic. Asegúrate de activar el Servicio de Accesibilidad.",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun saveConfiguration() {
