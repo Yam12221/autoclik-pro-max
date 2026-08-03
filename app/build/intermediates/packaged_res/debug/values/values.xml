@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#38BDF8</color>
+    <color name="bg_dark">#0F172A</color>
+    <color name="float_bg">#CC0F172A</color>
+    <color name="float_border">#38BDF8</color>
+    <color name="green_success">#22C55E</color>
+    <color name="primary">#0EA5E9</color>
+    <color name="primary_dark">#0284C7</color>
+    <color name="red_error">#EF4444</color>
+    <color name="surface_border">#334155</color>
+    <color name="surface_dark">#1E293B</color>
+    <color name="text_primary">#F8FAFC</color>
+    <color name="text_secondary">#94A3B8</color>
+    <string name="accessibility_service_desc">Servicio de accesibilidad para interceptar pulsaciones en botones flotantes falsos y transmitirlas de forma instantánea al botón real del juego con protección anti-baneo.</string>
+    <string name="accessibility_service_label">Servicio Reubicador Táctil Pro</string>
+    <string name="app_name">Reubicador de Botones Pro</string>
+    <string name="btn_grant">Conceder Permiso</string>
+    <string name="btn_granted">Concedido</string>
+    <string name="btn_start_service">Iniciar Reubicador Flotante</string>
+    <string name="btn_stop_service">Detener Reubicador Flotante</string>
+    <string name="perm_accessibility_desc">Requerido para simular toques en pantalla y transmitir señales táctiles al juego.</string>
+    <string name="perm_accessibility_title">1. Servicio de Accesibilidad</string>
+    <string name="perm_overlay_desc">Requerido para mostrar los botones flotantes de reubicación sobre el juego.</string>
+    <string name="perm_overlay_title">2. Mostrar sobre otras apps</string>
+    <string name="service_status_pending">Se requieren ambos permisos para activar el servicio</string>
+    <string name="service_status_ready">Servicio listo para ejecutar</string>
+    <style name="Theme.ButtonRelocatorPro" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+    </style>
+</resources>

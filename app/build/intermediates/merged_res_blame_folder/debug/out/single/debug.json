@@ -1,0 +1,82 @@
+[
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_close.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_close.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_lock_open.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_lock_open.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_drag.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_drag.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_security.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_security.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/layout_layout_target_pointer.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/layout/layout_target_pointer.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/layout_layout_control_panel.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/layout/layout_control_panel.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_visibility.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_visibility.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_settings.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_settings.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_bg_floating_panel.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/bg_floating_panel.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_add.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_add.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/layout_layout_trigger_button.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/layout/layout_trigger_button.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_bg_gradient.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/bg_gradient.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_lock_closed.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_lock_closed.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_bg_circle_trigger.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/bg_circle_trigger.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/layout_activity_main.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_pause.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_pause.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/xml_accessibility_service_config.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/xml/accessibility_service_config.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_ic_play.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/ic_play.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_bg_card.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/bg_card.xml"
+    },
+    {
+        "merged": "com.buttonrelocator.pro.app-merged_res-28:/drawable_bg_circle_target.xml.flat",
+        "source": "com.buttonrelocator.pro.app-main-30:/drawable/bg_circle_target.xml"
+    }
+]

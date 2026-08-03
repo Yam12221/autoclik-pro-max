@@ -1,0 +1,4 @@
+/home/runner/work/autoclik-pro-max/autoclik-pro-max/app/src/main/java/com/buttonrelocator/pro/MainActivity.kt
+/home/runner/work/autoclik-pro-max/autoclik-pro-max/app/src/main/java/com/buttonrelocator/pro/AntiDetectEngine.kt
+/home/runner/work/autoclik-pro-max/autoclik-pro-max/app/src/main/java/com/buttonrelocator/pro/ButtonPair.kt
+/home/runner/work/autoclik-pro-max/autoclik-pro-max/app/src/main/java/com/buttonrelocator/pro/RelocatorService.kt
