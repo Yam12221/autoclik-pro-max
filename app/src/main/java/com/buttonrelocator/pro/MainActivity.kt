@@ -6,26 +6,27 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.buttonrelocator.pro.databinding.ActivityMainBinding
+import androidx.appcompat.widget.SwitchCompat
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
     private var selectedProfileId = 1
     private var selectedSecurityLevel = AntiDetectEngine.SecurityLevel.STEALTH
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContentView(R.layout.activity_main)
 
         val prefs = getSharedPreferences("RelocatorPrefs", Context.MODE_PRIVATE)
         selectedProfileId = prefs.getInt("active_profile_id", 1)
         updateProfileUi(selectedProfileId)
 
+        val switchAntiDetect = findViewById<SwitchCompat>(R.id.switchAntiDetect)
         val isAntiDetect = prefs.getBoolean("antidetections_enabled", true)
-        binding.switchAntiDetect.isChecked = isAntiDetect
+        switchAntiDetect?.isChecked = isAntiDetect
 
         val securityLevelStr = prefs.getString("security_level", "STEALTH") ?: "STEALTH"
         selectedSecurityLevel = try {
@@ -46,20 +47,20 @@ class MainActivity : AppCompatActivity() {
     private fun setupListeners() {
         val prefs = getSharedPreferences("RelocatorPrefs", Context.MODE_PRIVATE)
 
-        binding.switchAntiDetect.setOnCheckedChangeListener { _, isChecked ->
+        findViewById<SwitchCompat>(R.id.switchAntiDetect)?.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("antidetections_enabled", isChecked).apply()
         }
 
-        binding.btnLevelStealth.setOnClickListener { selectSecurityLevel(AntiDetectEngine.SecurityLevel.STEALTH) }
-        binding.btnLevelBalanced.setOnClickListener { selectSecurityLevel(AntiDetectEngine.SecurityLevel.BALANCED) }
-        binding.btnLevelDirect.setOnClickListener { selectSecurityLevel(AntiDetectEngine.SecurityLevel.DIRECT) }
+        findViewById<Button>(R.id.btnLevelStealth)?.setOnClickListener { selectSecurityLevel(AntiDetectEngine.SecurityLevel.STEALTH) }
+        findViewById<Button>(R.id.btnLevelBalanced)?.setOnClickListener { selectSecurityLevel(AntiDetectEngine.SecurityLevel.BALANCED) }
+        findViewById<Button>(R.id.btnLevelDirect)?.setOnClickListener { selectSecurityLevel(AntiDetectEngine.SecurityLevel.DIRECT) }
 
-        binding.btnGrantAccessibility.setOnClickListener {
+        findViewById<Button>(R.id.btnGrantAccessibility)?.setOnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
         }
 
-        binding.btnGrantOverlay.setOnClickListener {
+        findViewById<Button>(R.id.btnGrantOverlay)?.setOnClickListener {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:$packageName")
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        binding.btnToggleService.setOnClickListener {
+        findViewById<Button>(R.id.btnToggleService)?.setOnClickListener {
             val service = RelocatorService.instance
             if (service != null) {
                 if (service.isOverlayShowing()) {
@@ -80,9 +81,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnProfile1.setOnClickListener { selectProfile(1) }
-        binding.btnProfile2.setOnClickListener { selectProfile(2) }
-        binding.btnProfile3.setOnClickListener { selectProfile(3) }
+        findViewById<Button>(R.id.btnProfile1)?.setOnClickListener { selectProfile(1) }
+        findViewById<Button>(R.id.btnProfile2)?.setOnClickListener { selectProfile(2) }
+        findViewById<Button>(R.id.btnProfile3)?.setOnClickListener { selectProfile(3) }
     }
 
     private fun selectSecurityLevel(level: AntiDetectEngine.SecurityLevel) {
@@ -96,25 +97,29 @@ class MainActivity : AppCompatActivity() {
         val activeTextColor = getColor(R.color.text_primary)
         val inactiveTextColor = getColor(R.color.text_secondary)
 
-        binding.btnLevelStealth.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
-        binding.btnLevelStealth.setTextColor(inactiveTextColor)
-        binding.btnLevelBalanced.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
-        binding.btnLevelBalanced.setTextColor(inactiveTextColor)
-        binding.btnLevelDirect.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
-        binding.btnLevelDirect.setTextColor(inactiveTextColor)
+        val btnStealth = findViewById<Button>(R.id.btnLevelStealth)
+        val btnBalanced = findViewById<Button>(R.id.btnLevelBalanced)
+        val btnDirect = findViewById<Button>(R.id.btnLevelDirect)
+
+        btnStealth?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
+        btnStealth?.setTextColor(inactiveTextColor)
+        btnBalanced?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
+        btnBalanced?.setTextColor(inactiveTextColor)
+        btnDirect?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
+        btnDirect?.setTextColor(inactiveTextColor)
 
         when (level) {
             AntiDetectEngine.SecurityLevel.STEALTH -> {
-                binding.btnLevelStealth.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
-                binding.btnLevelStealth.setTextColor(activeTextColor)
+                btnStealth?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
+                btnStealth?.setTextColor(activeTextColor)
             }
             AntiDetectEngine.SecurityLevel.BALANCED -> {
-                binding.btnLevelBalanced.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
-                binding.btnLevelBalanced.setTextColor(activeTextColor)
+                btnBalanced?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
+                btnBalanced?.setTextColor(activeTextColor)
             }
             AntiDetectEngine.SecurityLevel.DIRECT -> {
-                binding.btnLevelDirect.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
-                binding.btnLevelDirect.setTextColor(activeTextColor)
+                btnDirect?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
+                btnDirect?.setTextColor(activeTextColor)
             }
         }
     }
@@ -138,25 +143,29 @@ class MainActivity : AppCompatActivity() {
         val activeTextColor = getColor(R.color.text_primary)
         val inactiveTextColor = getColor(R.color.text_secondary)
 
-        binding.btnProfile1.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
-        binding.btnProfile1.setTextColor(inactiveTextColor)
-        binding.btnProfile2.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
-        binding.btnProfile2.setTextColor(inactiveTextColor)
-        binding.btnProfile3.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
-        binding.btnProfile3.setTextColor(inactiveTextColor)
+        val btnP1 = findViewById<Button>(R.id.btnProfile1)
+        val btnP2 = findViewById<Button>(R.id.btnProfile2)
+        val btnP3 = findViewById<Button>(R.id.btnProfile3)
+
+        btnP1?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
+        btnP1?.setTextColor(inactiveTextColor)
+        btnP2?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
+        btnP2?.setTextColor(inactiveTextColor)
+        btnP3?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.surface_border))
+        btnP3?.setTextColor(inactiveTextColor)
 
         when (activeId) {
             1 -> {
-                binding.btnProfile1.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
-                binding.btnProfile1.setTextColor(activeTextColor)
+                btnP1?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
+                btnP1?.setTextColor(activeTextColor)
             }
             2 -> {
-                binding.btnProfile2.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
-                binding.btnProfile2.setTextColor(activeTextColor)
+                btnP2?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
+                btnP2?.setTextColor(activeTextColor)
             }
             3 -> {
-                binding.btnProfile3.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
-                binding.btnProfile3.setTextColor(activeTextColor)
+                btnP3?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.primary))
+                btnP3?.setTextColor(activeTextColor)
             }
         }
     }
@@ -165,36 +174,42 @@ class MainActivity : AppCompatActivity() {
         val isAccessibilityEnabled = isAccessibilityServiceEnabled()
         val isOverlayEnabled = Settings.canDrawOverlays(this)
 
+        val txtAccStatus = findViewById<TextView>(R.id.txtAccessibilityStatus)
+        val btnGrantAcc = findViewById<Button>(R.id.btnGrantAccessibility)
+        val txtOverlayStatus = findViewById<TextView>(R.id.txtOverlayStatus)
+        val btnGrantOverlay = findViewById<Button>(R.id.btnGrantOverlay)
+        val btnToggleService = findViewById<Button>(R.id.btnToggleService)
+
         if (isAccessibilityEnabled) {
-            binding.txtAccessibilityStatus.text = getString(R.string.btn_granted)
-            binding.txtAccessibilityStatus.setTextColor(getColor(R.color.green_success))
-            binding.btnGrantAccessibility.isEnabled = false
-            binding.btnGrantAccessibility.text = getString(R.string.btn_granted)
-            binding.btnGrantAccessibility.alpha = 0.6f
+            txtAccStatus?.text = getString(R.string.btn_granted)
+            txtAccStatus?.setTextColor(getColor(R.color.green_success))
+            btnGrantAcc?.isEnabled = false
+            btnGrantAcc?.text = getString(R.string.btn_granted)
+            btnGrantAcc?.alpha = 0.6f
         } else {
-            binding.txtAccessibilityStatus.text = "Inactivo"
-            binding.txtAccessibilityStatus.setTextColor(getColor(R.color.red_error))
-            binding.btnGrantAccessibility.isEnabled = true
-            binding.btnGrantAccessibility.text = getString(R.string.btn_grant)
-            binding.btnGrantAccessibility.alpha = 1.0f
+            txtAccStatus?.text = "Inactivo"
+            txtAccStatus?.setTextColor(getColor(R.color.red_error))
+            btnGrantAcc?.isEnabled = true
+            btnGrantAcc?.text = getString(R.string.btn_grant)
+            btnGrantAcc?.alpha = 1.0f
         }
 
         if (isOverlayEnabled) {
-            binding.txtOverlayStatus.text = getString(R.string.btn_granted)
-            binding.txtOverlayStatus.setTextColor(getColor(R.color.green_success))
-            binding.btnGrantOverlay.isEnabled = false
-            binding.btnGrantOverlay.text = getString(R.string.btn_granted)
-            binding.btnGrantOverlay.alpha = 0.6f
+            txtOverlayStatus?.text = getString(R.string.btn_granted)
+            txtOverlayStatus?.setTextColor(getColor(R.color.green_success))
+            btnGrantOverlay?.isEnabled = false
+            btnGrantOverlay?.text = getString(R.string.btn_granted)
+            btnGrantOverlay?.alpha = 0.6f
         } else {
-            binding.txtOverlayStatus.text = "Inactivo"
-            binding.txtOverlayStatus.setTextColor(getColor(R.color.red_error))
-            binding.btnGrantOverlay.isEnabled = true
-            binding.btnGrantOverlay.text = getString(R.string.btn_grant)
-            binding.btnGrantOverlay.alpha = 1.0f
+            txtOverlayStatus?.text = "Inactivo"
+            txtOverlayStatus?.setTextColor(getColor(R.color.red_error))
+            btnGrantOverlay?.isEnabled = true
+            btnGrantOverlay?.text = getString(R.string.btn_grant)
+            btnGrantOverlay?.alpha = 1.0f
         }
 
         val bothPermissionsGranted = isAccessibilityEnabled && isOverlayEnabled
-        binding.btnToggleService.isEnabled = bothPermissionsGranted
+        btnToggleService?.isEnabled = bothPermissionsGranted
 
         if (bothPermissionsGranted) {
             val service = RelocatorService.instance
@@ -206,23 +221,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateServiceUi(ready: Boolean, isOverlayShowing: Boolean) {
+        val txtStatus = findViewById<TextView>(R.id.txtServiceStatus)
+        val btnToggle = findViewById<Button>(R.id.btnToggleService)
+
         if (!ready) {
-            binding.txtServiceStatus.text = getString(R.string.service_status_pending)
-            binding.txtServiceStatus.setTextColor(getColor(R.color.text_secondary))
-            binding.btnToggleService.isEnabled = false
-            binding.btnToggleService.text = getString(R.string.btn_start_service)
-            binding.btnToggleService.backgroundTintList = ColorStateList.valueOf(getColor(R.color.text_secondary))
+            txtStatus?.text = getString(R.string.service_status_pending)
+            txtStatus?.setTextColor(getColor(R.color.text_secondary))
+            btnToggle?.isEnabled = false
+            btnToggle?.text = getString(R.string.btn_start_service)
+            btnToggle?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.text_secondary))
         } else {
-            binding.txtServiceStatus.text = getString(R.string.service_status_ready)
-            binding.txtServiceStatus.setTextColor(getColor(R.color.text_primary))
-            binding.btnToggleService.isEnabled = true
+            txtStatus?.text = getString(R.string.service_status_ready)
+            txtStatus?.setTextColor(getColor(R.color.text_primary))
+            btnToggle?.isEnabled = true
             
             if (isOverlayShowing) {
-                binding.btnToggleService.text = getString(R.string.btn_stop_service)
-                binding.btnToggleService.backgroundTintList = ColorStateList.valueOf(getColor(R.color.red_error))
+                btnToggle?.text = getString(R.string.btn_stop_service)
+                btnToggle?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.red_error))
             } else {
-                binding.btnToggleService.text = getString(R.string.btn_start_service)
-                binding.btnToggleService.backgroundTintList = ColorStateList.valueOf(getColor(R.color.accent))
+                btnToggle?.text = getString(R.string.btn_start_service)
+                btnToggle?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.accent))
             }
         }
     }
