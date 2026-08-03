@@ -103,6 +103,7 @@ class AutoClickService : AccessibilityService() {
         windowManager.addView(controlPanelView, params)
         loadConfiguration()
         updateAddButtonVisibility()
+        updateProfileBadgeVisibility()
     }
 
     fun hideOverlay() {
@@ -132,6 +133,19 @@ class AutoClickService : AccessibilityService() {
         val btnLock = view.findViewById<ImageView>(R.id.btn_lock)
         val btnMinimize = view.findViewById<ImageView>(R.id.btn_minimize)
         val btnClose = view.findViewById<ImageView>(R.id.btn_close)
+        val btnProfileBadge = view.findViewById<TextView>(R.id.btn_profile_badge)
+
+        btnProfileBadge?.setOnClickListener {
+            if (isPlaying) return@setOnClickListener
+            val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
+            val currentProfile = prefs.getInt("active_profile_id", 1)
+            val nextProfile = if (currentProfile >= 3) 1 else currentProfile + 1
+            prefs.edit().putInt("active_profile_id", nextProfile).apply()
+
+            btnProfileBadge.text = "P$nextProfile"
+            loadConfiguration()
+            android.widget.Toast.makeText(this, "Perfil $nextProfile cargado", android.widget.Toast.LENGTH_SHORT).show()
+        }
 
         // Control Panel Drag Listener
         var initialX = 0
@@ -216,6 +230,7 @@ class AutoClickService : AccessibilityService() {
                 targets.forEach { it.view?.alpha = 1.0f }
             }
             updateAddButtonVisibility()
+            updateProfileBadgeVisibility()
         }
 
         btnClose.setOnClickListener {
@@ -503,6 +518,22 @@ class AutoClickService : AccessibilityService() {
             btnAdd.visibility = View.VISIBLE
             btnAdd.isEnabled = true
             btnAdd.alpha = 1.0f
+        }
+    }
+
+    fun updateProfileBadgeVisibility() {
+        val view = controlPanelView ?: return
+        val btnProfileBadge = view.findViewById<TextView>(R.id.btn_profile_badge) ?: return
+        val prefs = getSharedPreferences("AutoclikPrefs", MODE_PRIVATE)
+        val showProfileSetting = prefs.getBoolean("show_profile_selector", false)
+        val currentProfile = prefs.getInt("active_profile_id", 1)
+
+        btnProfileBadge.text = "P$currentProfile"
+
+        if (isMinimized || !showProfileSetting) {
+            btnProfileBadge.visibility = View.GONE
+        } else {
+            btnProfileBadge.visibility = View.VISIBLE
         }
     }
 

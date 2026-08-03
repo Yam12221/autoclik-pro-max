@@ -45,14 +45,6 @@
                         android:textColor="@color/text_primary"
                         android:textSize="28sp"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/app_intro"
-                        android:textColor="#E0E7FF"
-                        android:textSize="14sp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -191,6 +183,54 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
+                            app_ns:thumbTint="@color/accent"
+                            app_ns:trackTint="@color/surface_border" />
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/surface_border"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Profile Switcher Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Mostrar selector de perfil en barra"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Muestra un botón compacto (P1/P2/P3) en la barra flotante para alternar perfiles."
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/switchShowProfileSelector"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
                             app_ns:thumbTint="@color/accent"
                             app_ns:trackTint="@color/surface_border" />
                     </LinearLayout>

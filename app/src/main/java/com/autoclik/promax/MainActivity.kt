@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
         val showAddBtn = prefs.getBoolean("show_add_button", true)
         binding.switchShowAddButton.isChecked = showAddBtn
 
+        val showProfileSelector = prefs.getBoolean("show_profile_selector", false)
+        binding.switchShowProfileSelector.isChecked = showProfileSelector
+
         setupListeners()
     }
 
@@ -43,6 +46,14 @@ class MainActivity : AppCompatActivity() {
             val service = AutoClickService.instance
             if (service != null && service.isOverlayShowing()) {
                 service.updateAddButtonVisibility()
+            }
+        }
+
+        binding.switchShowProfileSelector.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean("show_profile_selector", isChecked).apply()
+            val service = AutoClickService.instance
+            if (service != null && service.isOverlayShowing()) {
+                service.updateProfileBadgeVisibility()
             }
         }
 

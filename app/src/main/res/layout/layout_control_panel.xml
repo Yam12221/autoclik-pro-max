@@ -77,6 +77,23 @@
         android:padding="6dp"
         android:contentDescription="Minimizar" />
 
+    <!-- Profile Badge Selector -->
+    <TextView
+        android:id="@+id/btn_profile_badge"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:text="P1"
+        android:textColor="@color/text_primary"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/bg_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="Cambiar Perfil"
+        android:visibility="gone" />
+
 
     <!-- Divider -->
     <View
