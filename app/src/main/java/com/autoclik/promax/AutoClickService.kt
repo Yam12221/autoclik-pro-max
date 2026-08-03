@@ -500,8 +500,8 @@ class AutoClickService : AccessibilityService() {
         path.moveTo(x.toFloat(), y.toFloat())
         
         val gestureBuilder = GestureDescription.Builder()
-        // Clicks need a brief stroke duration to register on Android correctly. 50ms is ideal.
-        gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, 50))
+        // Ultra-fast 1ms stroke duration so low millisecond intervals (10ms-50ms) execute at maximum speed
+        gestureBuilder.addStroke(GestureDescription.StrokeDescription(path, 0, 1))
         
         dispatchGesture(gestureBuilder.build(), null, null)
     }
