@@ -429,16 +429,21 @@ class RelocatorService : AccessibilityService() {
         val targetCenterX = pair.targetX + targetWidth / 2
         val targetCenterY = pair.targetY + targetHeight / 2
 
-        // Destello visual en el puntero R1 para confirmar que se detectó la pulsación
+        val prefs = getSharedPreferences("RelocatorPrefs", MODE_PRIVATE)
+
+        // Destello visual en el puntero R1 para confirmar que se detectó la pulsación, respetando la forma personalizada (círculo o cuadrado)
         val txtTargetNum = targetView.findViewById<TextView>(R.id.txt_target_number)
         txtTargetNum?.post {
-            txtTargetNum.setBackgroundResource(R.drawable.bg_circle_trigger)
+            val shape = prefs.getString("trigger_shape", "circle") ?: "circle"
+            val flashDrawable = if (shape == "square") R.drawable.bg_square_trigger else R.drawable.bg_circle_trigger
+            val normalDrawable = if (shape == "square") R.drawable.bg_square_target else R.drawable.bg_circle_target
+
+            txtTargetNum.setBackgroundResource(flashDrawable)
             txtTargetNum.postDelayed({
-                txtTargetNum.setBackgroundResource(R.drawable.bg_circle_target)
+                txtTargetNum.setBackgroundResource(normalDrawable)
             }, 120)
         }
 
-        val prefs = getSharedPreferences("RelocatorPrefs", MODE_PRIVATE)
         val isAntiDetect = prefs.getBoolean("antidetections_enabled", true)
         val levelStr = prefs.getString("security_level", "STEALTH") ?: "STEALTH"
         val securityLevel = try {
