@@ -1,9 +1,9 @@
 import urllib.request
 import json
-import zipfile
-import io
+import sys
 
-url = "https://api.github.com/repos/Yam12221/autoclik-pro-max/actions/runs/30826316781/jobs"
+run_id = sys.argv[1] if len(sys.argv) > 1 else "30829247592"
+url = f"https://api.github.com/repos/Yam12221/autoclik-pro-max/actions/runs/{run_id}/jobs"
 req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
 
 try:
@@ -18,7 +18,7 @@ try:
             log_content = log_resp.read().decode('utf-8', errors='ignore')
             lines = log_content.splitlines()
             print("--- LOG TAIL ---")
-            for l in lines[-60:]:
+            for l in lines[-100:]:
                 print(l)
 except Exception as e:
     print(f"Error: {e}")
