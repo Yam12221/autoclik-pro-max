@@ -383,7 +383,7 @@ class RelocatorService : AccessibilityService() {
         if (isLocked) return
         val dialogContext = ContextThemeWrapper(this, R.style.Theme_ButtonRelocatorPro)
         val builder = AlertDialog.Builder(dialogContext)
-        builder.setTitle("Eliminar Reubicador T$id")
+        builder.setTitle("Eliminar Reubicador T${pair.id}")
         builder.setMessage("¿Deseas eliminar la pareja del Botón Gatillo Flotante T${pair.id} y Puntero Real R${pair.id}?")
         builder.setPositiveButton("Eliminar") { dialog, _ ->
             removeRemapperPair(pair)
