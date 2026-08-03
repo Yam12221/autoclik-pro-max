@@ -21,6 +21,8 @@ object AntiDetectEngine {
         val preDelayMs: Long = 0L
     )
 
+    private val javaRandom = java.util.Random()
+
     fun calculateClick(
         baseX: Int,
         baseY: Int,
@@ -29,8 +31,8 @@ object AntiDetectEngine {
     ): HumanizedClick {
         return when (level) {
             SecurityLevel.STEALTH -> {
-                val dx = (Random.nextGaussian() * (jitterRadius / 2.0)).roundToInt().coerceIn(-jitterRadius, jitterRadius)
-                val dy = (Random.nextGaussian() * (jitterRadius / 2.0)).roundToInt().coerceIn(-jitterRadius, jitterRadius)
+                val dx = (javaRandom.nextGaussian() * (jitterRadius / 2.0)).roundToInt().coerceIn(-jitterRadius, jitterRadius)
+                val dy = (javaRandom.nextGaussian() * (jitterRadius / 2.0)).roundToInt().coerceIn(-jitterRadius, jitterRadius)
                 val duration = Random.nextLong(18, 46)
                 val preDelay = Random.nextLong(1, 7)
 
