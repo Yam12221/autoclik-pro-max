@@ -182,26 +182,29 @@ class RelocatorService : AccessibilityService() {
             }
         }
 
+        val container = view as android.view.ViewGroup
         btnMinimize.setOnClickListener {
             isMinimized = !isMinimized
             if (isMinimized) {
-                btnLock.visibility = View.GONE
-                btnClose.visibility = View.GONE
+                // Ocultar todos los controles del panel excepto el botón de minimizar
+                for (i in 0 until container.childCount) {
+                    val child = container.getChildAt(i)
+                    if (child.id != R.id.btn_minimize) {
+                        child.visibility = View.GONE
+                    }
+                }
                 btnMinimize.setColorFilter(getColor(R.color.accent))
-
-                buttonPairs.forEach { 
-                    it.targetView?.alpha = 0.2f
-                    it.triggerView?.alpha = 0.4f
-                }
+                btnMinimize.alpha = 0.4f // Hacer el icono semi-transparente para evitar distracción
+                container.setBackgroundResource(android.R.color.transparent)
             } else {
-                btnLock.visibility = View.VISIBLE
-                btnClose.visibility = View.VISIBLE
-                btnMinimize.clearColorFilter()
-
-                buttonPairs.forEach { 
-                    it.targetView?.alpha = 1.0f
-                    it.triggerView?.alpha = 1.0f
+                // Restaurar visibilidad de todos los controles
+                for (i in 0 until container.childCount) {
+                    val child = container.getChildAt(i)
+                    child.visibility = View.VISIBLE
                 }
+                btnMinimize.clearColorFilter()
+                btnMinimize.alpha = 1.0f
+                container.setBackgroundResource(R.drawable.bg_floating_panel)
             }
         }
 
