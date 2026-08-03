@@ -36,6 +36,16 @@ class MainActivity : AppCompatActivity() {
         }
         updateSecurityLevelUi(selectedSecurityLevel)
 
+        // Customization UI Initial States
+        val sizeDp = prefs.getInt("trigger_size_dp", 56)
+        updateSizeUi(sizeDp)
+
+        val shapeStr = prefs.getString("trigger_shape", "circle") ?: "circle"
+        updateShapeUi(shapeStr)
+
+        val opacityPct = (prefs.getFloat("trigger_opacity", 1.0f) * 100).toInt()
+        updateOpacityUi(opacityPct)
+
         setupListeners()
     }
 
@@ -84,6 +94,137 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnProfile1)?.setOnClickListener { selectProfile(1) }
         findViewById<Button>(R.id.btnProfile2)?.setOnClickListener { selectProfile(2) }
         findViewById<Button>(R.id.btnProfile3)?.setOnClickListener { selectProfile(3) }
+
+        // Size Customization Listeners
+        findViewById<Button>(R.id.btnSizeSmall)?.setOnClickListener { selectSize(40) }
+        findViewById<Button>(R.id.btnSizeMedium)?.setOnClickListener { selectSize(56) }
+        findViewById<Button>(R.id.btnSizeLarge)?.setOnClickListener { selectSize(72) }
+
+        // Shape Customization Listeners
+        findViewById<Button>(R.id.btnShapeCircle)?.setOnClickListener { selectShape("circle") }
+        findViewById<Button>(R.id.btnShapeSquare)?.setOnClickListener { selectShape("square") }
+
+        // Opacity Customization Listeners
+        findViewById<Button>(R.id.btnOpacityLow)?.setOnClickListener { selectOpacity(0.4f) }
+        findViewById<Button>(R.id.btnOpacityMedium)?.setOnClickListener { selectOpacity(0.7f) }
+        findViewById<Button>(R.id.btnOpacityHigh)?.setOnClickListener { selectOpacity(1.0f) }
+    }
+
+    private fun selectSize(sizeDp: Int) {
+        val prefs = getSharedPreferences("RelocatorPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putInt("trigger_size_dp", sizeDp).apply()
+        updateSizeUi(sizeDp)
+        notifyServiceUiChange()
+    }
+
+    private fun selectShape(shape: String) {
+        val prefs = getSharedPreferences("RelocatorPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("trigger_shape", shape).apply()
+        updateShapeUi(shape)
+        notifyServiceUiChange()
+    }
+
+    private fun selectOpacity(opacity: Float) {
+        val prefs = getSharedPreferences("RelocatorPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putFloat("trigger_opacity", opacity).apply()
+        updateOpacityUi((opacity * 100).toInt())
+        notifyServiceUiChange()
+    }
+
+    private fun notifyServiceUiChange() {
+        val service = RelocatorService.instance
+        if (service != null && service.isOverlayShowing()) {
+            service.refreshTriggerDesigns()
+        }
+    }
+
+    private fun updateSizeUi(sizeDp: Int) {
+        val activeColor = ColorStateList.valueOf(getColor(R.color.primary))
+        val inactiveColor = ColorStateList.valueOf(getColor(R.color.surface_border))
+        val activeText = getColor(R.color.text_primary)
+        val inactiveText = getColor(R.color.text_secondary)
+
+        val btnSmall = findViewById<Button>(R.id.btnSizeSmall)
+        val btnMedium = findViewById<Button>(R.id.btnSizeMedium)
+        val btnLarge = findViewById<Button>(R.id.btnSizeLarge)
+
+        btnSmall?.backgroundTintList = inactiveColor
+        btnSmall?.setTextColor(inactiveText)
+        btnMedium?.backgroundTintList = inactiveColor
+        btnMedium?.setTextColor(inactiveText)
+        btnLarge?.backgroundTintList = inactiveColor
+        btnLarge?.setTextColor(inactiveText)
+
+        when (sizeDp) {
+            40 -> {
+                btnSmall?.backgroundTintList = activeColor
+                btnSmall?.setTextColor(activeText)
+            }
+            56 -> {
+                btnMedium?.backgroundTintList = activeColor
+                btnMedium?.setTextColor(activeText)
+            }
+            72 -> {
+                btnLarge?.backgroundTintList = activeColor
+                btnLarge?.setTextColor(activeText)
+            }
+        }
+    }
+
+    private fun updateShapeUi(shape: String) {
+        val activeColor = ColorStateList.valueOf(getColor(R.color.primary))
+        val inactiveColor = ColorStateList.valueOf(getColor(R.color.surface_border))
+        val activeText = getColor(R.color.text_primary)
+        val inactiveText = getColor(R.color.text_secondary)
+
+        val btnCircle = findViewById<Button>(R.id.btnShapeCircle)
+        val btnSquare = findViewById<Button>(R.id.btnShapeSquare)
+
+        btnCircle?.backgroundTintList = inactiveColor
+        btnCircle?.setTextColor(inactiveText)
+        btnSquare?.backgroundTintList = inactiveColor
+        btnSquare?.setTextColor(inactiveText)
+
+        if (shape == "square") {
+            btnSquare?.backgroundTintList = activeColor
+            btnSquare?.setTextColor(activeText)
+        } else {
+            btnCircle?.backgroundTintList = activeColor
+            btnCircle?.setTextColor(activeText)
+        }
+    }
+
+    private fun updateOpacityUi(opacityPct: Int) {
+        val activeColor = ColorStateList.valueOf(getColor(R.color.primary))
+        val inactiveColor = ColorStateList.valueOf(getColor(R.color.surface_border))
+        val activeText = getColor(R.color.text_primary)
+        val inactiveText = getColor(R.color.text_secondary)
+
+        val btnLow = findViewById<Button>(R.id.btnOpacityLow)
+        val btnMid = findViewById<Button>(R.id.btnOpacityMedium)
+        val btnHigh = findViewById<Button>(R.id.btnOpacityHigh)
+
+        btnLow?.backgroundTintList = inactiveColor
+        btnLow?.setTextColor(inactiveText)
+        btnMid?.backgroundTintList = inactiveColor
+        btnMid?.setTextColor(inactiveText)
+        btnHigh?.backgroundTintList = inactiveColor
+        btnHigh?.setTextColor(inactiveText)
+
+        when (opacityPct) {
+            40 -> {
+                btnLow?.backgroundTintList = activeColor
+                btnLow?.setTextColor(activeText)
+            }
+            70 -> {
+                btnMid?.backgroundTintList = activeColor
+                btnMid?.setTextColor(activeText)
+            }
+            100 -> {
+                btnHigh?.backgroundTintList = activeColor
+                btnHigh?.setTextColor(activeText)
+            }
+        }
     }
 
     private fun selectSecurityLevel(level: AntiDetectEngine.SecurityLevel) {

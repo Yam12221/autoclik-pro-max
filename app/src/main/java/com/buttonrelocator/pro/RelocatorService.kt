@@ -269,6 +269,7 @@ class RelocatorService : AccessibilityService() {
         triggerView.setOnTouchListener(createTriggerTouchListener(pair, triggerParams))
 
         buttonPairs.add(pair)
+        applyCustomStylesToPair(pair)
 
         windowManager.addView(targetView, targetParams)
         windowManager.addView(triggerView, triggerParams)
@@ -468,9 +469,6 @@ class RelocatorService : AccessibilityService() {
         val success = dispatchGesture(gestureBuilder.build(), object : AccessibilityService.GestureResultCallback() {
             override fun onCompleted(gestureDescription: GestureDescription?) {
                 super.onCompleted(gestureDescription)
-                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    android.widget.Toast.makeText(applicationContext, "Clic inyectado en ($x, $y)", android.widget.Toast.LENGTH_SHORT).show()
-                }
             }
 
             override fun onCancelled(gestureDescription: GestureDescription?) {
@@ -588,6 +586,7 @@ class RelocatorService : AccessibilityService() {
         triggerView.setOnTouchListener(createTriggerTouchListener(pair, triggerParams))
 
         buttonPairs.add(pair)
+        applyCustomStylesToPair(pair)
 
         windowManager.addView(targetView, targetParams)
         windowManager.addView(triggerView, triggerParams)
@@ -609,6 +608,54 @@ class RelocatorService : AccessibilityService() {
             try {
                 windowManager.updateViewLayout(targetView, params)
             } catch (e: Exception) {}
+        }
+    }
+
+    fun refreshTriggerDesigns() {
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            for (pair in buttonPairs) {
+                applyCustomStylesToPair(pair)
+            }
+        }
+    }
+
+    private fun applyCustomStylesToPair(pair: ButtonPair) {
+        val triggerView = pair.triggerView ?: return
+        val targetView = pair.targetView ?: return
+        val prefs = getSharedPreferences("RelocatorPrefs", MODE_PRIVATE)
+
+        val sizeDp = prefs.getInt("trigger_size_dp", 56)
+        val shape = prefs.getString("trigger_shape", "circle") ?: "circle"
+        val opacity = prefs.getFloat("trigger_opacity", 1.0f)
+
+        val density = resources.displayMetrics.density
+        val sizePx = (sizeDp * density).toInt()
+
+        // 1. Aplicar tamaño, forma y opacidad al botón gatillo T
+        val txtTriggerLabel = triggerView.findViewById<TextView>(R.id.txt_trigger_label)
+        txtTriggerLabel?.let {
+            val lp = it.layoutParams
+            lp.width = sizePx
+            lp.height = sizePx
+            it.layoutParams = lp
+
+            if (shape == "square") {
+                it.setBackgroundResource(R.drawable.bg_square_trigger)
+            } else {
+                it.setBackgroundResource(R.drawable.bg_circle_trigger)
+            }
+            it.alpha = opacity
+        }
+
+        // 2. Aplicar forma y opacidad al puntero R (el tamaño de R se mantiene pequeño a 44dp para precisión)
+        val txtTargetNum = targetView.findViewById<TextView>(R.id.txt_target_number)
+        txtTargetNum?.let {
+            if (shape == "square") {
+                it.setBackgroundResource(R.drawable.bg_square_target)
+            } else {
+                it.setBackgroundResource(R.drawable.bg_circle_target)
+            }
+            it.alpha = opacity
         }
     }
 }
