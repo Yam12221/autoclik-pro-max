@@ -168,6 +168,7 @@ class RelocatorService : AccessibilityService() {
 
         btnLock.setOnClickListener {
             isLocked = !isLocked
+            updatePairsTouchFlags()
             if (isLocked) {
                 btnLock.setImageResource(R.drawable.ic_lock_closed)
                 btnLock.setColorFilter(getColor(R.color.accent))
@@ -271,6 +272,7 @@ class RelocatorService : AccessibilityService() {
 
         windowManager.addView(targetView, targetParams)
         windowManager.addView(triggerView, triggerParams)
+        updatePairsTouchFlags()
         saveConfiguration()
     }
 
@@ -589,5 +591,24 @@ class RelocatorService : AccessibilityService() {
 
         windowManager.addView(targetView, targetParams)
         windowManager.addView(triggerView, triggerParams)
+        updatePairsTouchFlags()
+    }
+
+    private fun updatePairsTouchFlags() {
+        for (pair in buttonPairs) {
+            val targetView = pair.targetView ?: continue
+            val params = targetView.layoutParams as WindowManager.LayoutParams
+            if (isLocked) {
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            } else {
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+            }
+            try {
+                windowManager.updateViewLayout(targetView, params)
+            } catch (e: Exception) {}
+        }
     }
 }
